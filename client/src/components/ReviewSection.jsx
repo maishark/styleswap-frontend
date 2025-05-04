@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Star, X, Edit, Trash2 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
-const API_BASE_URL = process.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const ReviewSection = ({ productId }) => {
   const [showAddReview, setShowAddReview] = useState(false);

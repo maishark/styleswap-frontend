@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import PaymentMethod from './PaymentMethod';
 import PaymentForm from './PaymentForm';
 import PaymentStatus from './PaymentStatus';
-const API_BASE_URL = process.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const PaymentPage = () => {
   const location = useLocation();

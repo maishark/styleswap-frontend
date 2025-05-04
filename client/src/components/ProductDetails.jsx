@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import PacmanLoader from "react-spinners/PacmanLoader";
 import toast from "react-hot-toast";
 import ReviewSection from "./ReviewSection";
-const API_BASE_URL = process.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export function ProductDetails() {
   const { id } = useParams();

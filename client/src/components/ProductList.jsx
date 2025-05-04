@@ -9,7 +9,7 @@ import axios from "axios";
 import PacmanLoader from "react-spinners/PacmanLoader";
 import OccasionList from "./OccasionList";
 import FilterSidebar from "./FilterSidebar";
-const API_BASE_URL = process.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export function ProductList() {
   const [products, setProducts] = useState([]);

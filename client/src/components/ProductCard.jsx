@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Heart, ShoppingCart, Repeat, MoreVertical } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-const API_BASE_URL = process.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
