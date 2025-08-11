@@ -3,7 +3,6 @@ import { Trash2, ShoppingCart } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';  // import Link for navigation
-const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const Wishlist = () => {
   const [wishlist, setWishlist] = useState({ items: [] });
@@ -20,7 +19,7 @@ const Wishlist = () => {
 
   const fetchWishlist = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/wishlist/${user._id}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/wishlist/${user._id}`);
       setWishlist(response.data.wishlist || { items: [] });
     } catch (error) {
       toast.error('Failed to fetch wishlist');
@@ -31,7 +30,7 @@ const Wishlist = () => {
 
   const removeFromWishlist = async (productId) => {
     try {
-      await axios.post('${API_BASE_URL}/api/wishlist/remove', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/wishlist/remove`, {
         userId: user._id,
         productId
       });
@@ -44,7 +43,7 @@ const Wishlist = () => {
 
   const addToCart = async (productId) => {
     try {
-      await axios.post('${API_BASE_URL}/api/cart/add', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/cart/add`, {
         userId: user._id,
         productId,
         quantity: 1

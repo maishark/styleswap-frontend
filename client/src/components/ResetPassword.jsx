@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -13,7 +12,7 @@ const ResetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_BASE_URL}/api/users/reset-password/${token}`, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/users/reset-password/${token}`, {
         password,
         confirmPassword,
       });

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
+import Homepage from './components/Homepage';
 import Login from './components/Login';
 import Register from './components/Register';
 import Profile from './components/Profile';
@@ -15,7 +16,7 @@ import Wishlist from './components/Wishlist';
 import ClosetSwap from './components/ClosetSwap'; 
 import PaymentPage from './components/PaymentPage';
 import AdminDashboard from "./pages/AdminDashboard";
-import AdminPrivateRoute from "./pages/AdminPrivateRoute"; // ✅ from pages/
+import AdminPrivateRoute from "./pages/AdminPrivateRoute"; 
 
 function App() {
   return (
@@ -24,7 +25,8 @@ function App() {
         <Navbar />
         <Routes>
 
-          <Route path="/" element={<ProductList />} />
+          <Route path="/" element={<Homepage />} />
+          <Route path="/products" element={<ProductList />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

@@ -14,7 +14,7 @@ const FilterSidebar = ({
     size: ["L"],
     color: [],
     duration: [],
-    priceRange: [500, 5000],
+    priceRange: [0, 5000],
   });
 
   // Initialize with any existing filters
@@ -46,18 +46,19 @@ const FilterSidebar = ({
   const genders = ["Male", "Female", "Unisex"];
   const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
-  const colors = [
-    { name: "Black", hex: "#000000" },
-    { name: "White", hex: "#FFFFFF" },
-    { name: "Red", hex: "#DC2626" },
-    { name: "Blue", hex: "#2563EB" },
-    { name: "Green", hex: "#059669" },
-    { name: "Yellow", hex: "#EAB308" },
-    { name: "Purple", hex: "#7C3AED" },
-    { name: "Pink", hex: "#EC4899" },
-    { name: "Gold", hex: "#D4AF37" },
-    { name: "Silver", hex: "#C0C0C0" },
-  ];
+const colors = [
+  { name: "Black", hex: "#000000" },
+  { name: "White", hex: "#FFFFFF" },
+  { name: "Red", hex: "#DC2626" },
+  { name: "Blue", hex: "#2563EB" },
+  { name: "Green", hex: "#059669" },
+  { name: "Yellow", hex: "#EAB308" },
+  { name: "Purple", hex: "#7C3AED" },
+  { name: "Pink", hex: "#EC4899" },
+  { name: "Gold", hex: "#D4AF37" },
+  { name: "Silver", hex: "#C0C0C0" },
+  { name: "Orange", hex: "#FFA500" }, 
+];
 
   const durations = [
     "7 Days",
@@ -116,7 +117,7 @@ const FilterSidebar = ({
       size: [],
       color: [],
       duration: [],
-      priceRange: [500, 5000],
+      priceRange: [0, 5000],
       tags: [],
     });
     onClearFilters();

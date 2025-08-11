@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const Profile = () => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
@@ -30,7 +29,7 @@ const Profile = () => {
 
   const fetchMyOrders = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/orders/user/${user._id}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders/user/${user._id}`);
       setMyOrders(res.data);
     } catch (error) {
       console.error('Error fetching my orders:', error);
@@ -39,7 +38,7 @@ const Profile = () => {
 
   const fetchOwnerOrders = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/orders/owner/${user._id}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders/owner/${user._id}`);
       setOwnerOrders(res.data);
     } catch (error) {
       console.error('Error fetching owner orders:', error);
@@ -48,7 +47,7 @@ const Profile = () => {
 
   const fetchReceivedRequests = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/exchanges/received/${user._id}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/exchanges/received/${user._id}`);
       setReceivedRequests(res.data.requests);
     } catch (error) {
       console.error('Error fetching received swap requests:', error);
@@ -57,7 +56,7 @@ const Profile = () => {
 
   const fetchSentRequests = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/exchanges/sent/${user._id}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/exchanges/sent/${user._id}`);
       setSentRequests(res.data.requests);
     } catch (error) {
       console.error('Error fetching sent swap requests:', error);
@@ -67,7 +66,7 @@ const Profile = () => {
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.put(`${API_BASE_URL}/api/users/${user._id}`, formData);
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/users/${user._id}`, formData);
       setUser(res.data);
       localStorage.setItem('user', JSON.stringify(res.data));
       setIsEditing(false);
@@ -79,7 +78,7 @@ const Profile = () => {
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
-      await axios.put(`${API_BASE_URL}/api/orders/update-status`, { orderId, newStatus });
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/orders/update-status`, { orderId, newStatus });
       toast.success('Order status updated!');
       fetchOwnerOrders();
     } catch (error) {
@@ -89,7 +88,7 @@ const Profile = () => {
 
   const handleSwapAction = async (requestId, action) => {
     try {
-      await axios.patch('${API_BASE_URL}/api/exchanges/status', { requestId, action });
+      await axios.patch(`${import.meta.env.VITE_API_URL}/api/exchanges/status`, { requestId, action });
       toast.success(`Request ${action.toLowerCase()} successfully!`);
       fetchReceivedRequests();
     } catch (error) {
@@ -99,7 +98,7 @@ const Profile = () => {
 
   const handleSwapStatusChange = async (requestId, newStatus) => {
     try {
-      await axios.patch('${API_BASE_URL}/api/exchanges/swap-status', { requestId, newStatus });
+      await axios.patch(`${import.meta.env.VITE_API_URL}/api/exchanges/swap-status`, { requestId, newStatus });
       toast.success('Swap status updated!');
       fetchReceivedRequests();
     } catch (error) {

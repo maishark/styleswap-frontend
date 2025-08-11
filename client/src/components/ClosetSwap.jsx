@@ -2,7 +2,6 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const ClosetSwap = () => {
   const { ownerId } = useParams();
@@ -27,7 +26,7 @@ const ClosetSwap = () => {
 
     const fetchWishlist = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/wishlist/${ownerId}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/wishlist/${ownerId}`);
         if (response.data?.wishlist?.items) {
           setWishlist(response.data.wishlist.items);
         } else {
@@ -55,7 +54,7 @@ const ClosetSwap = () => {
     }
 
     try {
-      await axios.post('${API_BASE_URL}/api/exchanges/request', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/exchanges/request`, {
         ownerId,
         offeredProductId: selectedProductId,
         requestedById: currentUser._id,

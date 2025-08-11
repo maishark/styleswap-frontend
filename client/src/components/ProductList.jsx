@@ -3,13 +3,11 @@
 import { useState, useEffect } from "react";
 import { Search, Filter } from "lucide-react";
 import ProductCard from "./ProductCard";
-
 import { AddProductForm } from "./AddProductForm";
 import axios from "axios";
 import PacmanLoader from "react-spinners/PacmanLoader";
 import OccasionList from "./OccasionList";
 import FilterSidebar from "./FilterSidebar";
-const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export function ProductList() {
   const [products, setProducts] = useState([]);
@@ -17,6 +15,9 @@ export function ProductList() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 9;
+
   const [activeFilters, setActiveFilters] = useState({
     occasion: [],
     subEvents: [],
@@ -24,7 +25,7 @@ export function ProductList() {
     size: [],
     color: [],
     duration: [],
-    priceRange: [500, 5000],
+    priceRange: [0, 5000],
   });
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -34,9 +35,7 @@ export function ProductList() {
     async function getProducts() {
       try {
         setIsLoading(true);
-        const response = await axios.get(
-          "${API_BASE_URL}/api/products/all-products"
-        );
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/products/all-products`);
         if (response.data.success) {
           setProducts(response.data.data);
         }
@@ -52,6 +51,7 @@ export function ProductList() {
   const handleApplyFilters = (filters) => {
     setActiveFilters(filters);
     setShowFilters(false);
+    setCurrentPage(1);
   };
 
   const handleClearFilters = () => {
@@ -64,6 +64,7 @@ export function ProductList() {
       duration: [],
       priceRange: [500, 5000],
     });
+    setCurrentPage(1);
   };
 
   const filteredProducts = products.filter((product) => {
@@ -111,33 +112,21 @@ export function ProductList() {
     if (activeFilters.duration.length > 0 && product.duration) {
       let matches = false;
       activeFilters.duration.forEach((durationRange) => {
+        const durationValue = Number.parseInt(product.duration);
         if (
-          durationRange === "7 Days" &&
-          Number.parseInt(product.duration.split(" ")[0]) <= 7
-        ) {
-          matches = true;
-        } else if (
-          durationRange === "15 Days" &&
-          Number.parseInt(product.duration) >= 8 &&
-          Number.parseInt(product.duration) <= 15
-        ) {
-          matches = true;
-        } else if (
-          durationRange === "1 month" &&
-          Number.parseInt(product.duration) >= 16 &&
-          Number.parseInt(product.duration) <= 30
-        ) {
-          matches = true;
-        } else if (
-          durationRange === "1 & 1/2 month" &&
-          Number.parseInt(product.duration) >= 31 &&
-          Number.parseInt(product.duration) <= 45
-        ) {
-          matches = true;
-        } else if (
-          durationRange === "2 month" &&
-          Number.parseInt(product.duration) >= 46 &&
-          Number.parseInt(product.duration) <= 60
+          (durationRange === "7 Days" && durationValue <= 7) ||
+          (durationRange === "15 Days" &&
+            durationValue >= 8 &&
+            durationValue <= 15) ||
+          (durationRange === "1 month" &&
+            durationValue >= 16 &&
+            durationValue <= 30) ||
+          (durationRange === "1 & 1/2 month" &&
+            durationValue >= 31 &&
+            durationValue <= 45) ||
+          (durationRange === "2 month" &&
+            durationValue >= 46 &&
+            durationValue <= 60)
         ) {
           matches = true;
         }
@@ -166,6 +155,15 @@ export function ProductList() {
     },
     0
   );
+
+  // Pagination logic
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -200,7 +198,10 @@ export function ProductList() {
                     type="text"
                     placeholder="Search products..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
@@ -231,7 +232,7 @@ export function ProductList() {
                       <span className="text-sm font-medium text-gray-700">
                         Active filters:
                       </span>
-                      {/* render active filters here as you already do */}
+                      {/* You can list active filters here */}
                     </div>
                   )}
 
@@ -239,7 +240,7 @@ export function ProductList() {
                     Our Products
                   </h1>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredProducts.map((product) => (
+                    {currentProducts.map((product) => (
                       <ProductCard key={product._id} product={product} />
                     ))}
                   </div>
@@ -248,6 +249,52 @@ export function ProductList() {
                     <p className="text-center text-gray-500 mt-8">
                       No products found matching your filters
                     </p>
+                  )}
+
+                  {/* Pagination Controls */}
+                  {filteredProducts.length > productsPerPage && (
+                    <div className="flex justify-center mt-6 gap-2 flex-wrap">
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+                      >
+                        Prev
+                      </button>
+
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .slice(
+                          Math.max(0, currentPage - 3),
+                          Math.min(totalPages, currentPage + 2)
+                        )
+                        .map((page) => (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`px-3 py-1 rounded ${
+                              currentPage === page
+                                ? "bg-indigo-600 text-white"
+                                : "bg-gray-200 hover:bg-gray-300"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            prev < totalPages ? prev + 1 : prev
+                          )
+                        }
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+                      >
+                        Next
+                      </button>
+                    </div>
                   )}
                 </>
               )}

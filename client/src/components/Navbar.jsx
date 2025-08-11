@@ -13,9 +13,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+    <nav className="fixed top-0 left-0 w-full backdrop-blur-lg bg-white/40 border border-white/30 shadow-lg z-30">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex justify-between h-16 items-center">
           {/* Logo/Home */}
           <Link to="/" className="text-2xl font-bold text-indigo-600">
             StyleSwap

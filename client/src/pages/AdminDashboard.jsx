@@ -4,13 +4,13 @@ const AdminDashboard = () => {
   const [bannedUsers, setBannedUsers] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:1226/api/admin/dashboard")
+    fetch(`${import.meta.env.VITE_API_URL}/api/admin/dashboard`)
       .then((res) => res.json())
       .then((data) => setBannedUsers(data));
   }, []);
 
   const handleUnban = async (userId) => {
-    const response = await fetch("http://localhost:1226/api/admin/unban-user", {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/unban-user`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId }),

@@ -3,7 +3,7 @@ import { Trash2, Plus, Minus } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 const Cart = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState({ products: [] });
@@ -20,7 +20,8 @@ const Cart = () => {
 
   const fetchCart = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/cart/$${user._id}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/cart/${user._id}`);
+      //(`http://localhost:1226/api/cart/${user._id}`);
       setCart(response.data.cart || { products: [] });
     } catch (error) {
       toast.error('Failed to fetch cart');
@@ -31,7 +32,7 @@ const Cart = () => {
 
   const updateQuantity = async (productId, quantity) => {
     try {
-      await axios.post('${API_BASE_URL}/api/cart/update', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/cart/update`, {
         userId: user._id,
         productId,
         quantity
@@ -44,7 +45,7 @@ const Cart = () => {
 
   const removeItem = async (productId) => {
     try {
-      await axios.post('${API_BASE_URL}/api/cart/remove', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/cart/remove`, {
         userId: user._id,
         productId
       });
@@ -57,7 +58,7 @@ const Cart = () => {
 
   const clearCart = async () => {
     try {
-      await axios.post('${API_BASE_URL}/api/cart/clear', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/cart/clear`, {
         userId: user._id
       });
       fetchCart();
@@ -75,7 +76,7 @@ const Cart = () => {
   
     try {
       for (const item of cart.products) {
-        await axios.post('${API_BASE_URL}/api/orders/place-order', {
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/cart//orders/place-order`, {
           userId: user._id,
           product: item.productId._id,
           owner: item.productId.ownerId?._id || item.productId.ownerId,

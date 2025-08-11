@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,8 +17,8 @@ const Login = () => {
   
     try {
       const loginRoute = isAdmin 
-        ? '${API_BASE_URL}/api/admin/login'
-        : '${API_BASE_URL}/api/users/login';
+        ? `${import.meta.env.VITE_API_URL}/api/admin/login`
+        : `${import.meta.env.VITE_API_URL}/api/users/login`;
   
       const response = await axios.post(loginRoute, formData);
   
@@ -30,7 +29,7 @@ const Login = () => {
       if (response.data.user?.isAdmin) {
         navigate('/admin/dashboard');
       } else {
-        navigate('/profile');
+        navigate('/');
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');

@@ -1,12 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Heart, ShoppingCart, Repeat } from "lucide-react";
 import axios from "axios";
-import { useState, useEffect } from "react";
 import PacmanLoader from "react-spinners/PacmanLoader";
 import toast from "react-hot-toast";
 import ReviewSection from "./ReviewSection";
-const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export function ProductDetails() {
   const { id } = useParams();
@@ -16,13 +14,16 @@ export function ProductDetails() {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
+  const isAdmin = user?.isAdmin === true;
+  const isOwner =
+    product?.ownerId?._id === user._id || product?.ownerId === user._id;
+
   useEffect(() => {
     async function getProduct() {
       try {
         setIsLoading(true);
         const response = await axios.get(
-          `${API_BASE_URL}/api/products/view-product/${id}`
-        );
+          `${import.meta.env.VITE_API_URL}/api/products/view-product/${id}`);
 
         if (response.data.success) {
           const data = response.data.data;
@@ -39,7 +40,7 @@ export function ProductDetails() {
 
   const handleAddToCart = async () => {
     try {
-      await axios.post("${API_BASE_URL}/api/cart/add", {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/cart/add`, {
         userId: user._id,
         productId: id,
         quantity: 1,
@@ -53,14 +54,14 @@ export function ProductDetails() {
   const handleToggleWishlist = async () => {
     try {
       if (!isWishlisted) {
-        await axios.post("${API_BASE_URL}/api/wishlist/add", {
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/wishlist/add`, {
           userId: user._id,
           productId: id,
         });
         setIsWishlisted(true);
         toast.success("Added to wishlist");
       } else {
-        await axios.post("${API_BASE_URL}/api/wishlist/remove", {
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/wishlist/remove`, {
           userId: user._id,
           productId: id,
         });
@@ -70,6 +71,14 @@ export function ProductDetails() {
     } catch (error) {
       toast.error("Failed to update wishlist");
     }
+  };
+
+  const handleClosetSwap = () => {
+    const ownerId = product?.ownerId?._id || product?.ownerId;
+    const requestedProductId = product._id;
+
+    localStorage.setItem("requestedProductId", requestedProductId);
+    navigate(`/closet-swap/${ownerId}`);
   };
 
   if (!product) {
@@ -123,7 +132,7 @@ export function ProductDetails() {
                       <h1 className="text-3xl font-bold text-gray-900 mb-2">
                         {product.name}
                       </h1>
-                      {user._id && (
+                      {user._id && !isAdmin && !isOwner && (
                         <button
                           onClick={handleToggleWishlist}
                           className={`p-2 rounded-full ${
@@ -167,16 +176,31 @@ export function ProductDetails() {
                         <span className="text-gray-600">Duration</span>
                         <p className="font-medium">{product.duration}</p>
                       </div>
+                      <div className="col-span-2">
+                        <span className="text-gray-600">Owner</span>
+                        <p className="font-medium">
+                          {product?.ownerId?.name || "Unknown"}
+                        </p>
+                      </div>
                     </div>
 
-                    {user._id && (
-                      <button
-                        onClick={handleAddToCart}
-                        className="mt-6 w-full flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-                      >
-                        <ShoppingCart className="w-5 h-5 mr-2" />
-                        Add to Cart
-                      </button>
+                    {user._id && !isAdmin && !isOwner && (
+                      <div className="mt-6 flex gap-4">
+                        <button
+                          onClick={handleAddToCart}
+                          className="flex-1 flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                        >
+                          <ShoppingCart className="w-5 h-5 mr-2" />
+                          Add to Cart
+                        </button>
+                        <button
+                          onClick={handleClosetSwap}
+                          className="flex-1 flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700"
+                        >
+                          <Repeat className="w-5 h-5 mr-2" />
+                          Closet Swap
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
