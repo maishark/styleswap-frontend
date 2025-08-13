@@ -10,6 +10,9 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
+  const DRYCLEANING_FEE_PER_ITEM = 40;
+  const DELIVERY_CHARGE = 60;
+
   useEffect(() => {
     if (user._id) {
       fetchCart();
@@ -21,7 +24,6 @@ const Cart = () => {
   const fetchCart = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/cart/${user._id}`);
-      //(`http://localhost:1226/api/cart/${user._id}`);
       setCart(response.data.cart || { products: [] });
     } catch (error) {
       toast.error('Failed to fetch cart');
@@ -73,25 +75,31 @@ const Cart = () => {
       toast.error('Cart is empty');
       return;
     }
-  
+
     try {
+      let productTotal = 0;
+
       for (const item of cart.products) {
-        await axios.post(`${import.meta.env.VITE_API_URL}/api/cart//orders/place-order`, {
+        productTotal += parseFloat(item.productId.price) * item.quantity;
+
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/orders/place-order`, {
           userId: user._id,
           product: item.productId._id,
           owner: item.productId.ownerId?._id || item.productId.ownerId,
-          duration: parseInt(item.productId.duration?.toString().split(" ")[0]) || 7, // fallback to 7
+          duration: parseInt(item.productId.duration?.toString().split(" ")[0]) || 7,
         });
       }
-  
+
+      const drycleaningfees = DRYCLEANING_FEE_PER_ITEM * cart.products.length;
+      const totalAmount = productTotal + drycleaningfees + DELIVERY_CHARGE;
+
       toast.success('Order(s) placed successfully!');
-      navigate('/payment', { state: { total } });
+      navigate('/payment', { state: { total: totalAmount } });
     } catch (error) {
       toast.error('Failed to place order');
       console.error(error.response?.data || error.message);
     }
   };
-  
 
   if (loading) {
     return (
@@ -112,9 +120,12 @@ const Cart = () => {
     );
   }
 
-  const total = cart.products?.reduce((sum, item) => {
-    return sum + (item.productId.price * item.quantity);
+  const productTotal = cart.products?.reduce((sum, item) => {
+    return sum + parseFloat(item.productId.price) * item.quantity;
   }, 0) || 0;
+
+  const drycleaningfees = DRYCLEANING_FEE_PER_ITEM * cart.products.length;
+  const total = productTotal + drycleaningfees + DELIVERY_CHARGE;
 
   return (
     <div className="min-h-screen bg-gray-100 py-12">
@@ -124,10 +135,7 @@ const Cart = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Shopping Cart</h2>
               {cart.products?.length > 0 && (
-                <button
-                  onClick={clearCart}
-                  className="text-red-600 hover:text-red-800"
-                >
+                <button onClick={clearCart} className="text-red-600 hover:text-red-800">
                   Clear Cart
                 </button>
               )}
@@ -150,7 +158,7 @@ const Cart = () => {
                         />
                         <div className="ml-4">
                           <h3 className="text-lg font-medium text-gray-900">{item.productId.name}</h3>
-                          <p className="text-gray-500">৳{item.productId.price}</p>
+                          <p className="text-gray-500">Price: ৳{item.productId.price}</p>
                         </div>
                       </div>
                       <div className="flex items-center">
@@ -178,7 +186,18 @@ const Cart = () => {
                   ))}
                 </div>
 
-                <div className="mt-8 flex justify-between items-center">
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between">
+                    <span>Dry Cleaning Charge:</span>
+                    <span>৳{drycleaningfees}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Delivery Charge:</span>
+                    <span>৳{DELIVERY_CHARGE}</span>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-between items-center">
                   <p className="text-lg font-medium text-gray-900">Total: ৳{total}</p>
                   <button
                     onClick={placeOrder}

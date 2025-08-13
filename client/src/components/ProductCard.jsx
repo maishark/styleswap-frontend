@@ -112,7 +112,6 @@ export default function ProductCard({ product }) {
     navigate(`/closet-swap/${ownerId}`);
   };
   
-
   const isOwner = product?.ownerId?._id === user._id || product?.ownerId === user._id;
 
   return (
@@ -121,15 +120,24 @@ export default function ProductCard({ product }) {
       onClick={() => navigate(`/product/${product._id}`)}
     >
       <div className="relative h-64">
-        <img 
-          src={product.image} 
-          alt={product.name} 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-sm font-semibold text-gray-700">
-          {product.condition}
-        </div>
+      <img 
+        src={product.image} 
+        alt={product.name} 
+        className="w-full h-full object-cover"
+      />
 
+      {/* Condition Badge */}
+      <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-sm font-semibold text-gray-700">
+        {product.condition}
+      </div>
+
+      {/* Availability Badge */}
+      <div
+        className={`absolute top-10 right-2 px-2 py-1 rounded-full text-sm font-semibold 
+          ${product.available ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+      >
+        {product.available ? "Available" : "Unavailable"}
+      </div>
         {isAdmin && (
           <div className="absolute top-2 right-10 z-20">
             <button onClick={toggleAdminMenu} className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
@@ -201,7 +209,7 @@ export default function ProductCard({ product }) {
 
           <div className="pt-2 mt-2 border-t flex justify-between items-center gap-2 flex-wrap">
             <p className="text-xl font-bold text-indigo-600">৳{product.price}</p>
-            {user._id && !isAdmin && !isOwner && (
+            {user._id && !isAdmin && !isOwner && product.available && (
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={handleAddToCart}

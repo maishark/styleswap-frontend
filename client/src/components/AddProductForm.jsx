@@ -7,8 +7,11 @@ import { useNavigate } from "react-router-dom";
 export function AddProductForm() {
   const [formData, setFormData] = useState({
     name: "",
+    customName: "",
     size: "",
+    customSize: "",
     color: "",
+    customColor: "",
     gender: "",
     condition: "",
     image: "",
@@ -19,17 +22,27 @@ export function AddProductForm() {
   const [isBanned, setIsBanned] = useState(false);
   const navigate = useNavigate();
 
-  // Check if user is banned
+  const nameOptions = [
+    "Saree", "Punjabi", "Salwar Kameez", "Suit", "Trousers", "Pajamas",
+    "Shorts", "Blazer", "Kurti", "Shirt", "T-shirt", "Pant", "Skirt",
+    "Scarf", "Gown", "Lehenga", "Others"
+  ];
+
+  const colorOptions = [
+    "White", "Black", "Beige", "Brown", "Red", "Blue", "Green", "Yellow",
+    "Pink", "Orange", "Purple", "Grey", "Navy", "Maroon", "Others"
+  ];
+
+  const sizeOptions = ["N/A", "XS", "S", "M", "L", "XL", "XXL", "Others"];
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         if (res.data.isBanned) {
           setIsBanned(true);
           toast.error("You are banned and cannot add products");
@@ -38,37 +51,44 @@ export function AddProductForm() {
         console.error("Failed to fetch user info", err);
       }
     };
-
     fetchUser();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isBanned) return; // Prevent submission if banned
+    if (isBanned) return;
+
+    const finalData = {
+      ...formData,
+      name: formData.name === "Others" ? formData.customName : formData.name,
+      color: formData.color === "Others" ? formData.customColor : formData.color,
+      size: formData.size === "Others" ? formData.customSize : formData.size,
+    };
 
     try {
       setIsLoading(true);
       const token = localStorage.getItem("token");
-
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/products/add-product`,
-        { ...formData },
+        finalData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (response.data.success) {
         toast.success("✅ Product added successfully!");
-        navigate("/products"); // Redirect to product list page
+        navigate("/products");
       }
     } catch (err) {
-      console.error("Error adding product:", err.response?.data?.message || err.message);
+      console.error(err);
       toast.error(err.response?.data?.message || "Failed to add product");
     } finally {
       setIsLoading(false);
       setFormData({
         name: "",
+        customName: "",
         size: "",
+        customSize: "",
         color: "",
+        customColor: "",
         gender: "",
         condition: "",
         image: "",
@@ -79,14 +99,11 @@ export function AddProductForm() {
   };
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white/40 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-full max-w-lg border border-white/30">
         <h2 className="text-3xl font-extrabold text-indigo-700 mb-6 text-center">
           Add New Product
@@ -98,21 +115,89 @@ export function AddProductForm() {
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            {[{ label: "Name", name: "name", type: "text" },
-              { label: "Size", name: "size", type: "text" },
-              { label: "Color", name: "color", type: "text" }].map((field) => (
-              <div key={field.name}>
-                <label className="block text-sm font-medium text-gray-700">{field.label}</label>
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Name</label>
+              <select
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                required
+              >
+                <option value="">Select Name</option>
+                {nameOptions.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+              {formData.name === "Others" && (
                 <input
-                  type={field.type}
-                  name={field.name}
-                  value={formData[field.name]}
+                  type="text"
+                  name="customName"
+                  value={formData.customName}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  placeholder="Enter custom name"
+                  className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   required
                 />
-              </div>
-            ))}
+              )}
+            </div>
+
+            {/* Color */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Color</label>
+              <select
+                name="color"
+                value={formData.color}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                required
+              >
+                <option value="">Select Color</option>
+                {colorOptions.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+              {formData.color === "Others" && (
+                <input
+                  type="text"
+                  name="customColor"
+                  value={formData.customColor}
+                  onChange={handleChange}
+                  placeholder="Enter custom color"
+                  className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
+                />
+              )}
+            </div>
+
+            {/* Size */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Size</label>
+              <select
+                name="size"
+                value={formData.size}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                required
+              >
+                <option value="">Select Size</option>
+                {sizeOptions.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+              {formData.size === "Others" && (
+                <input
+                  type="text"
+                  name="customSize"
+                  value={formData.customSize}
+                  onChange={handleChange}
+                  placeholder="Enter custom size"
+                  className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
+                />
+              )}
+            </div>
 
             {/* Gender */}
             <div>

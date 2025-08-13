@@ -23,11 +23,10 @@ export function ProductDetails() {
       try {
         setIsLoading(true);
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/products/view-product/${id}`);
-
+          `${import.meta.env.VITE_API_URL}/api/products/view-product/${id}`
+        );
         if (response.data.success) {
-          const data = response.data.data;
-          setProduct(data);
+          setProduct(response.data.data);
         }
       } catch (error) {
         console.log(error);
@@ -39,6 +38,8 @@ export function ProductDetails() {
   }, [id]);
 
   const handleAddToCart = async () => {
+    if (String(product.isAvailable) !== "true")
+      return toast.error("Product is unavailable");
     try {
       await axios.post(`${import.meta.env.VITE_API_URL}/api/cart/add`, {
         userId: user._id,
@@ -74,9 +75,10 @@ export function ProductDetails() {
   };
 
   const handleClosetSwap = () => {
+    if (String(product.isAvailable) !== "true")
+      return toast.error("Product is unavailable for swap");
     const ownerId = product?.ownerId?._id || product?.ownerId;
     const requestedProductId = product._id;
-
     localStorage.setItem("requestedProductId", requestedProductId);
     navigate(`/closet-swap/${ownerId}`);
   };
@@ -85,9 +87,7 @@ export function ProductDetails() {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Product not found
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900">Product not found</h2>
           <button
             onClick={() => navigate("/")}
             className="mt-4 inline-flex items-center text-indigo-600 hover:text-indigo-700"
@@ -118,37 +118,50 @@ export function ProductDetails() {
         ) : (
           <>
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="md:flex">
-                <div className="md:w-1/2">
+              <div className="md:flex relative">
+                <div className="md:w-1/2 relative">
                   <img
                     src={product.image}
                     alt={product.name}
                     className="w-full h-96 object-cover"
                   />
-                </div>
-                <div className="md:w-1/2 p-8">
-                  <div className="mb-4">
-                    <div className="flex justify-between items-start">
-                      <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        {product.name}
-                      </h1>
-                      {user._id && !isAdmin && !isOwner && (
-                        <button
-                          onClick={handleToggleWishlist}
-                          className={`p-2 rounded-full ${
-                            isWishlisted ? "text-red-500" : "text-gray-400"
-                          } hover:text-red-500`}
-                        >
-                          <Heart
-                            className="w-6 h-6"
-                            fill={isWishlisted ? "currentColor" : "none"}
-                          />
-                        </button>
-                      )}
-                    </div>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                  {/* Condition & Availability badges */}
+                  <div className="absolute top-2 left-2 flex gap-2">
+                    <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-800 text-sm font-medium">
                       {product.condition}
                     </span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        String(product.available) === "true"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {String(product.available) === "true"
+                        ? "Available"
+                        : "Unavailable"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="md:w-1/2 p-8">
+                  <div className="mb-4 flex justify-between items-start">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                      {product.name}
+                    </h1>
+                    {user._id && !isAdmin && !isOwner && (
+                      <button
+                        onClick={handleToggleWishlist}
+                        className={`p-2 rounded-full ${
+                          isWishlisted ? "text-red-500" : "text-gray-400"
+                        } hover:text-red-500`}
+                      >
+                        <Heart
+                          className="w-6 h-6"
+                          fill={isWishlisted ? "currentColor" : "none"}
+                        />
+                      </button>
+                    )}
                   </div>
 
                   <div className="space-y-4">
@@ -184,18 +197,28 @@ export function ProductDetails() {
                       </div>
                     </div>
 
-                    {user._id && !isAdmin && !isOwner && (
+                    {user._id && !isAdmin && !isOwner && product.available && (
                       <div className="mt-6 flex gap-4">
                         <button
                           onClick={handleAddToCart}
-                          className="flex-1 flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                          disabled={String(product.isAvailable) !== "true"}
+                          className={`flex-1 flex items-center justify-center px-6 py-3 rounded-md shadow-sm text-base font-medium transition-colors ${
+                            String(product.isAvailable) === "true"
+                              ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          }`}
                         >
                           <ShoppingCart className="w-5 h-5 mr-2" />
                           Add to Cart
                         </button>
                         <button
                           onClick={handleClosetSwap}
-                          className="flex-1 flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700"
+                          disabled={String(product.isAvailable) !== "true"}
+                          className={`flex-1 flex items-center justify-center px-6 py-3 rounded-md shadow-sm text-base font-medium transition-colors ${
+                            String(product.isAvailable) === "true"
+                              ? "bg-green-600 text-white hover:bg-green-700"
+                              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          }`}
                         >
                           <Repeat className="w-5 h-5 mr-2" />
                           Closet Swap
@@ -207,7 +230,7 @@ export function ProductDetails() {
               </div>
             </div>
 
-            {/* Review Section with productId */}
+            {/* Review Section */}
             <div className="mt-10">
               <ReviewSection productId={product._id} />
             </div>

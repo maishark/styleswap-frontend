@@ -20,12 +20,12 @@ export function ProductList() {
 
   const [activeFilters, setActiveFilters] = useState({
     occasion: [],
-    subEvents: [],
     gender: "",
     size: [],
     color: [],
     duration: [],
     priceRange: [0, 5000],
+    availability: "All",
   });
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -35,7 +35,9 @@ export function ProductList() {
     async function getProducts() {
       try {
         setIsLoading(true);
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/products/all-products`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/products/all-products`
+        );
         if (response.data.success) {
           setProducts(response.data.data);
         }
@@ -57,24 +59,47 @@ export function ProductList() {
   const handleClearFilters = () => {
     setActiveFilters({
       occasion: [],
-      subEvents: [],
       gender: "",
       size: [],
       color: [],
       duration: [],
-      priceRange: [500, 5000],
+      priceRange: [0, 5000],
+      availability: "All",
     });
     setCurrentPage(1);
   };
 
+  const occasionMap = {
+    "Wedding Season": { field: "name", values: ["Saree", "Lehenga", "Punjabi"] },
+    Corporate: { field: "name", values: ["Blazer", "Suit", "Shirt", "Pant"] },
+    Neutrals: { field: "color", values: ["Beige", "Brown", "White", "Grey"] },
+    "Weekend Casual": { field: "name", values: ["Trousers", "Kurti", "T-shirt"] },
+  };
+
   const filteredProducts = products.filter((product) => {
+    const name = product.name?.toLowerCase() || "";
+    const color = product.color?.toLowerCase() || "";
+    const condition = product.condition?.toLowerCase() || "";
+    const s = searchTerm.toLowerCase();
+
     const matchesSearch =
-      searchTerm === "" ||
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.color.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.condition.toLowerCase().includes(searchTerm.toLowerCase());
+      s === "" || name.includes(s) || color.includes(s) || condition.includes(s);
 
     if (!matchesSearch) return false;
+
+    if (activeFilters.occasion.length > 0) {
+      let occasionMatch = false;
+      for (const occ of activeFilters.occasion) {
+        const cfg = occasionMap[occ];
+        if (!cfg) continue;
+        const fieldVal = (product[cfg.field] || "").toString().toLowerCase();
+        if (cfg.values.some((v) => fieldVal === v.toLowerCase())) {
+          occasionMatch = true;
+          break;
+        }
+      }
+      if (!occasionMatch) return false;
+    }
 
     if (
       activeFilters.gender &&
@@ -85,53 +110,46 @@ export function ProductList() {
       return false;
     }
 
-    if (
-      activeFilters.size.length > 0 &&
-      !activeFilters.size.includes(product.size)
-    ) {
+    if (activeFilters.size.length > 0 && !activeFilters.size.includes(product.size)) {
       return false;
     }
 
     if (
       activeFilters.color.length > 0 &&
-      !activeFilters.color.some((color) =>
-        product.color.toLowerCase().includes(color.toLowerCase())
-      )
+      !activeFilters.color.some((c) => color.includes(c.toLowerCase()))
     ) {
       return false;
     }
 
-    if (
-      product.price &&
-      (Number.parseInt(product.price) < activeFilters.priceRange[0] ||
-        Number.parseInt(product.price) > activeFilters.priceRange[1])
-    ) {
-      return false;
+    const priceNum = parseInt(product.price, 10);
+    if (!Number.isNaN(priceNum)) {
+      if (
+        priceNum < activeFilters.priceRange[0] ||
+        priceNum > activeFilters.priceRange[1]
+      ) {
+        return false;
+      }
     }
 
     if (activeFilters.duration.length > 0 && product.duration) {
       let matches = false;
+      const durationValue = parseInt(product.duration, 10);
       activeFilters.duration.forEach((durationRange) => {
-        const durationValue = Number.parseInt(product.duration);
         if (
           (durationRange === "7 Days" && durationValue <= 7) ||
-          (durationRange === "15 Days" &&
-            durationValue >= 8 &&
-            durationValue <= 15) ||
-          (durationRange === "1 month" &&
-            durationValue >= 16 &&
-            durationValue <= 30) ||
-          (durationRange === "1 & 1/2 month" &&
-            durationValue >= 31 &&
-            durationValue <= 45) ||
-          (durationRange === "2 month" &&
-            durationValue >= 46 &&
-            durationValue <= 60)
+          (durationRange === "15 Days" && durationValue >= 8 && durationValue <= 15) ||
+          (durationRange === "1 month" && durationValue >= 16 && durationValue <= 30) ||
+          (durationRange === "1 & 1/2 month" && durationValue >= 31 && durationValue <= 45) ||
+          (durationRange === "2 month" && durationValue >= 46 && durationValue <= 60)
         ) {
           matches = true;
         }
       });
       if (!matches) return false;
+    }
+
+    if (activeFilters.availability === "Available Only" && product.available === false) {
+      return false;
     }
 
     return true;
@@ -140,9 +158,13 @@ export function ProductList() {
   const activeFilterCount = Object.entries(activeFilters).reduce(
     (count, [key, value]) => {
       if (key === "priceRange") {
-        if (value[0] !== 500 || value[1] !== 5000) {
+        if (value[0] !== 0 || value[1] !== 5000) {
           return count + 1;
         }
+        return count;
+      }
+      if (key === "availability") {
+        if (value === "Available Only") return count + 1;
         return count;
       }
       if (Array.isArray(value)) {
@@ -156,7 +178,6 @@ export function ProductList() {
     0
   );
 
-  // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(
@@ -232,7 +253,6 @@ export function ProductList() {
                       <span className="text-sm font-medium text-gray-700">
                         Active filters:
                       </span>
-                      {/* You can list active filters here */}
                     </div>
                   )}
 
@@ -251,7 +271,6 @@ export function ProductList() {
                     </p>
                   )}
 
-                  {/* Pagination Controls */}
                   {filteredProducts.length > productsPerPage && (
                     <div className="flex justify-center mt-6 gap-2 flex-wrap">
                       <button

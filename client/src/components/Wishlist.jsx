@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Trash2, ShoppingCart } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';  // import Link for navigation
+import { Link } from 'react-router-dom';
 
 const Wishlist = () => {
   const [wishlist, setWishlist] = useState({ items: [] });
@@ -97,6 +97,7 @@ const Wishlist = () => {
                       <h3 className="text-lg font-medium text-gray-900">{item.productId.name}</h3>
                       <p className="text-gray-500 mt-1">৳{item.productId.price}</p>
                       <div className="mt-4 flex justify-between">
+                        {item.productId.available && (
                         <button
                           onClick={() => addToCart(item.productId._id)}
                           className="flex items-center text-indigo-600 hover:text-indigo-800"
@@ -104,13 +105,14 @@ const Wishlist = () => {
                           <ShoppingCart className="w-5 h-5 mr-1" />
                           Add to Cart
                         </button>
-                        <button
-                          onClick={() => removeFromWishlist(item.productId._id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
+                      )}
+                      <button
+                        onClick={() => removeFromWishlist(item.productId._id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                     </div>
                   </div>
                 ))}
