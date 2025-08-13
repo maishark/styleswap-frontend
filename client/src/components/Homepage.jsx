@@ -64,23 +64,31 @@ const Homepage = () => {
         />
 
         {/* Glass Effect Text Box */}
-        <div className="absolute top-1/2 right-10 transform -translate-y-1/2 w-[380px] backdrop-blur-lg bg-white/40 rounded-2xl shadow-lg p-8 border border-white/30">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900">
+      <div
+        className="absolute top-1/2 right-1/2 md:right-10 transform -translate-y-1/2 translate-x-1/2 md:translate-x-0 
+                  w-[90%] md:w-[380px] min-h-[320px] md:min-h-[360px] 
+                  backdrop-blur-lg bg-white/40 rounded-2xl shadow-lg 
+                  p-6 md:p-8 border border-white/30 flex flex-col justify-between"
+      >
+        <div>
+          <h1 className="text-2xl md:text-5xl font-extrabold mb-3 md:mb-4 text-gray-900 text-center md:text-left">
             {slide.title}
           </h1>
-          <h2 className="text-xl md:text-2xl mb-3 text-gray-700">
+          <h2 className="text-lg md:text-2xl mb-2 md:mb-3 text-gray-700 text-center md:text-left">
             {slide.subtitle}
           </h2>
-          <p className="text-lg mb-6 text-gray-600 leading-relaxed">
+          <p className="text-sm md:text-lg mb-4 md:mb-6 text-gray-600 leading-relaxed text-center md:text-left">
             {slide.description}
           </p>
-          <button
-            onClick={scrollToProducts}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full text-lg font-semibold shadow-md transition transform hover:scale-105"
-          >
-            Explore Collection
-          </button>
         </div>
+        <button
+          onClick={scrollToProducts}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 md:px-6 md:py-3 rounded-full text-base md:text-lg font-semibold shadow-md transition transform hover:scale-105 self-center md:self-start"
+        >
+          Explore Collection
+        </button>
+      </div>
+
       </div>
     ))}
   </div>
