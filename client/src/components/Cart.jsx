@@ -70,36 +70,49 @@ const Cart = () => {
     }
   };
 
-  const placeOrder = async () => {
-    if (cart.products.length === 0) {
-      toast.error('Cart is empty');
-      return;
-    }
+const placeOrder = async () => {
+  if (cart.products.length === 0) {
+    toast.error('Cart is empty');
+    return;
+  }
 
-    try {
-      let productTotal = 0;
+  try {
+    // Calculate total product cost
+    const productTotal = cart.products.reduce((sum, item) => {
+      return sum + parseFloat(item.productId.price) * item.quantity;
+    }, 0);
 
-      for (const item of cart.products) {
-        productTotal += parseFloat(item.productId.price) * item.quantity;
+    // Prepare items array for backend
+    const items = cart.products.map(item => ({
+      product: item.productId._id,
+      owner: item.productId.ownerId?._id || item.productId.ownerId,
+      duration: parseInt(item.productId.duration?.toString().split(" ")[0]) || 7,
+      quantity: item.quantity
+    }));
 
-        await axios.post(`${import.meta.env.VITE_API_URL}/api/orders/place-order`, {
-          userId: user._id,
-          product: item.productId._id,
-          owner: item.productId.ownerId?._id || item.productId.ownerId,
-          duration: parseInt(item.productId.duration?.toString().split(" ")[0]) || 7,
-        });
+    // Send all products in one request
+    await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/orders/place-order`,
+      {
+        userId: user._id,
+        items
+      },
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       }
+    );
 
-      const drycleaningfees = DRYCLEANING_FEE_PER_ITEM * cart.products.length;
-      const totalAmount = productTotal + drycleaningfees + DELIVERY_CHARGE;
+    // Calculate total including fees
+    const drycleaningfees = DRYCLEANING_FEE_PER_ITEM * cart.products.length;
+    const totalAmount = productTotal + drycleaningfees + DELIVERY_CHARGE;
 
-      toast.success('Order(s) placed successfully!');
-      navigate('/payment', { state: { total: totalAmount } });
-    } catch (error) {
-      toast.error('Failed to place order');
-      console.error(error.response?.data || error.message);
-    }
-  };
+    toast.success('Order(s) placed successfully!');
+    navigate('/payment', { state: { total: totalAmount } });
+  } catch (error) {
+    toast.error('Failed to place order');
+    console.error(error.response?.data || error.message);
+  }
+};
 
   if (loading) {
     return (
