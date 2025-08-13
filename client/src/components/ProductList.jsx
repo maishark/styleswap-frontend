@@ -246,7 +246,7 @@ export function ProductList() {
                 </div>
               ) : (
                 <>
-                  <OccasionList />
+                  
 
                   {activeFilterCount > 0 && (
                     <div className="mb-4 flex flex-wrap gap-2 items-center">
