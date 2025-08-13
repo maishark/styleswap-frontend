@@ -201,9 +201,9 @@ export function ProductDetails() {
                       <div className="mt-6 flex gap-4">
                         <button
                           onClick={handleAddToCart}
-                          disabled={String(product.isAvailable) !== "true"}
+                          disabled={String(product.available) !== "true"}
                           className={`flex-1 flex items-center justify-center px-6 py-3 rounded-md shadow-sm text-base font-medium transition-colors ${
-                            String(product.isAvailable) === "true"
+                            String(product.available) === "true"
                               ? "bg-indigo-600 text-white hover:bg-indigo-700"
                               : "bg-gray-300 text-gray-500 cursor-not-allowed"
                           }`}
@@ -213,9 +213,9 @@ export function ProductDetails() {
                         </button>
                         <button
                           onClick={handleClosetSwap}
-                          disabled={String(product.isAvailable) !== "true"}
+                          disabled={String(product.available) !== "true"}
                           className={`flex-1 flex items-center justify-center px-6 py-3 rounded-md shadow-sm text-base font-medium transition-colors ${
-                            String(product.isAvailable) === "true"
+                            String(product.available) === "true"
                               ? "bg-green-600 text-white hover:bg-green-700"
                               : "bg-gray-300 text-gray-500 cursor-not-allowed"
                           }`}
