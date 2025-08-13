@@ -38,7 +38,7 @@ export function ProductDetails() {
   }, [id]);
 
   const handleAddToCart = async () => {
-    if (String(product.isAvailable) !== "true")
+    if (!(product.available))
       return toast.error("Product is unavailable");
     try {
       await axios.post(`${import.meta.env.VITE_API_URL}/api/cart/add`, {
@@ -75,7 +75,7 @@ export function ProductDetails() {
   };
 
   const handleClosetSwap = () => {
-    if (String(product.isAvailable) !== "true")
+    if (String(product.available) !== "true")
       return toast.error("Product is unavailable for swap");
     const ownerId = product?.ownerId?._id || product?.ownerId;
     const requestedProductId = product._id;
