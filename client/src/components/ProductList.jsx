@@ -6,7 +6,6 @@ import ProductCard from "./ProductCard";
 import { AddProductForm } from "./AddProductForm";
 import axios from "axios";
 import PacmanLoader from "react-spinners/PacmanLoader";
-import OccasionList from "./OccasionList";
 import FilterSidebar from "./FilterSidebar";
 
 export function ProductList() {
